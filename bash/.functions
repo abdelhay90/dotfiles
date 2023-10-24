@@ -17,7 +17,7 @@ function _jump() {
     local cur=${COMP_WORDS[COMP_CWORD]}
     COMPREPLY=( $(compgen -W "$( ls $MARKPATH )" -- $cur) )
 }
-complete -F _jump j
+# complete -F _jump j
 
 function mark { 
     mkdir -p $MARKPATH; ln -s $(pwd) $MARKPATH/$1
@@ -80,3 +80,55 @@ extract () {
         echo "'$1' is not a valid file"
     fi
 }
+
+function gclean() {
+  git fetch -ap && git branch -avv | grep -i  ": gone]" | awk '{print $1}' | xargs git branch $@
+}
+
+function prune_git_history() {
+    echo "prunnig and removing unrefrenced blobs from local history."
+    echo "git gc --prune=now"
+    git gc --prune=now
+    echo "deleteing branches references to remote branches that do not exist."
+    echo "git remote prune origin"
+    git remote prune origin
+    echo "Done."
+}
+
+function line () {
+    echo "----------------------------------------"
+}
+
+function rename_git_branch(){
+    set -e
+    # echo an error message before exiting
+    trap 'echo "\"${last_command}\" command filed with exit code $?."' EXIT
+    echo "Checking out the old branch"
+    echo "git checkout $1" 
+    git checkkout $1
+    line
+    echo "Renaming branch"
+    echo "git branch -m $2"
+    git branch -m $2
+    line
+    echo "Pushing branch with new name to remote"
+    echo "git push origin -u $2"
+    git push origin -u $2
+    line
+    if [ $3 = "-r" ]
+    then
+        echo "Deleting remote branch with old name"
+        echo "git push origin --delete $1"
+        git push origin --delete $1
+        line
+    fi
+    echo "Done!"
+}
+
+# function run_kamel($args){
+#     set -e
+#     cd /Users/ahmed_abdulhay/Work/incorta/kamel
+#     ./kamel.sh $args
+#     # cd -
+#     # pwd
+# }

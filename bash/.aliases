@@ -18,14 +18,17 @@ alias nr="yarn"
 alias t="yarn test"
 alias b="yarn build"
 alias d="yarn dev"
-alias s="yarn serve"
-alias de="yarn dev-example"
-alias be="yarn build-example"
+alias s="yarn start"
+alias ns="npm start"
+alias nb="npm run build"
+alias nd="npm run dev"
+alias nt="npm run test"
 
 # git shortcuts
 alias gs="git status"
 alias ga="git add -A ."
 alias gc="git commit"
+alias gcm="git commit -m"
 alias gb="git branch"
 alias gd="git diff"
 alias gco="git checkout"
@@ -43,6 +46,7 @@ alias gbb="git bisect bad"
 alias hs="hexo server"
 alias hd="rm db.json && hexo generate && hexo deploy"
 alias blog="cd ~/Personal/blog && subl . && hexo server"
+alias rnm="rm -rf ./node_modules"
 
 # npm shortcuts that only list top-level modules
 alias l="yarn list --depth=0 2>/dev/null"
@@ -51,11 +55,22 @@ alias lg="npm list -g --depth=0 2>/dev/null"
 # process finding
 alias pg="pgrep -lf"
 
-# appengine deploy
-alias dp="appcfg.py update . --oauth2"
+# go to cmc ui repo
+alias cmc-ui="cd ~/Work/incorta/backend/incorta.cmc/ui"
 
-# run jasmine tests
-alias jj="jasmine-node --verbose test/unit/specs/"
+alias mysql=/usr/local/Cellar/mysql/8.0.21_1/bin/mysql
+alias mysqladmin=/usr/local/Cellar/mysql/8.0.21_1/bin/mysqladmin
 
-# checked out version of meteor
-alias m="~/Work/meteor/meteor"
+alias run-loader-d="./gradlew -PwarFast :incortaWar:farmRunWarLoader --debug"
+alias run-analytics-d="./gradlew clean -x check -PwarFast :incortaWar:war && ./gradlew :incortaWar:farmRunWarAnalytics -x war --debug"
+alias start-zk="~/IncortaAnalytics/IncortaNode/start-zookeeper.sh"
+alias git-prune-history="git gc --prune=now && git remote prune origin"
+alias kamel="cd /Users/ahmed_abdulhay/Work/incorta/kamel/ && ./kamel.sh || cd -"
+
+# --------------------------------------------------------------------------------------------------------
+alias inc="./incorta-docker.sh"
+alias inc-down-a="./incorta-docker.sh down-all"
+alias inc-down="./incorta-docker.sh down"
+alias inc-analytics-d="./incorta-docker.sh analytics-debug"
+alias inc-loader-d="./incorta-docker.sh loader-debug"
+alias inc-cmc-d="./incorta-docker.sh cmc-debug"

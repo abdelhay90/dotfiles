@@ -21,7 +21,7 @@ function git_info() {
 	branch=$(git symbolic-ref -q HEAD | sed -e 's|^refs/heads/||')
 	# check if it's dirty (via github.com/sindresorhus/pure)
 	dirty=$(git diff --quiet --ignore-submodules HEAD &>/dev/null; [ $? -eq 1 ]&& echo -e "*")
-	echo $RESET" on "$LIGHTRED$branch$dirty
+	echo $RESET" on "$LIGHTRED$branch
 }
 
 # Only show username/host if not default
@@ -42,4 +42,21 @@ function usernamehost() {
 # in the iterm tab
 # \[\e]1;\]$(basename $(dirname $PWD))/\W\[\a\]
 
+# PS1="\[\e]2;$PWD\[\a\]\[\e]1;\]$(basename "$(dirname "$PWD")")/\W\[\a\]\$(usernamehost)\[$ORANGE\]\w\$(git_info)\[$RESET\]\n\$ "
+
+# parse_git_branch() {
+#   git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
+# }
+
+function parse_git_dirty {
+  [[ $(git status 2> /dev/null | tail -n1) != "nothing to commit (working directory clean)" ]] && echo "*"
+}
+function parse_git_branch {
+  git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/ $LIGHTRED(\1$(parse_git_dirty))/"
+}
+
+# export PS1="\u@\h \W\[\033[32m\]\$(parse_git_branch)\[\033[00m\] \n\$ "
+
+# PS1="\[\e]2;$PWD\[\a\]\[\e]1;\]$(basename "$(dirname "$PWD")")/\W\[\a\]\$(usernamehost)\[$ORANGE\]\w\$(parse_git_branch)\[$RESET\]\n\$ "
 PS1="\[\e]2;$PWD\[\a\]\[\e]1;\]$(basename "$(dirname "$PWD")")/\W\[\a\]\$(usernamehost)\[$ORANGE\]\w\$(git_info)\[$RESET\]\n\$ "
+

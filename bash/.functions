@@ -125,6 +125,26 @@ function rename_git_branch(){
     echo "Done!"
 }
 
+function update_bff_api()  {
+    echo "pnpm generate:clean"
+    pnpm generate:clean
+    sleep 4
+    echo "-------------------------------------------------------------"
+    echo "pnpm generate:auth"
+    pnpm generate:auth
+    sleep 4
+    echo "-------------------------------------------------------------"
+    echo "update swagger.json file and remove \"<>\","
+    sed -i '' 's/"<>",//g' ./swagger.json
+    sleep 4
+    echo "-------------------------------------------------------------"
+    echo "pnpm generate:bff"
+    pnpm generate:bff
+    sleep 4
+    echo "-------------------------------------------------------------"
+    echo "Happy hacking!"
+}
+
 # function run_kamel($args){
 #     set -e
 #     cd /Users/ahmed_abdulhay/Work/incorta/kamel

@@ -49,7 +49,8 @@ export LSCOLORS=ExGxdxDxCxegedhbadaced
 # set default editor
 # export EDITOR='code'
 # export VISUAL="$EDITOR"
-export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_261.jdk/Contents/Home
+# export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_261.jdk/Contents/Home
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/openlogic-openjdk-8.jdk/Contents/Home
 export PATH=$PATH:$JAVA_HOME/bin
 
 # common places

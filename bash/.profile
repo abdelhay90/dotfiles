@@ -32,5 +32,5 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 export BUN_INSTALL="$HOME/.bun" 
 export PATH="$BUN_INSTALL/bin:$PATH" 
 export PATH="$HOME/.local/bin:$PATH"
-export ANTHROPIC_AUTH=ollama
+export ANTHROPIC_AUTH_TOKEN=ollama
 export ANTHROPIC_BASE_URL=http://localhost:11434

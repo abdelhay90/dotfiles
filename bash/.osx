@@ -51,24 +51,11 @@ export LSCOLORS=ExGxdxDxCxegedhbadaced
 # export VISUAL="$EDITOR"
 # export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_261.jdk/Contents/Home
 export JAVA_HOME=/Library/Java/JavaVirtualMachines/openlogic-openjdk-8.jdk/Contents/Home
+# export JAVA_HOME=/Library/Java/JavaVirtualMachines/openlogic-openjdk-21.jdk/Contents/Home
 export PATH=$PATH:$JAVA_HOME/bin
 
 # common places
-alias v="cd ~/Vue"
-alias vv="cd ~/Vue/vue"
-alias vn="cd ~/Vue/vue-next"
-alias vc="cd ~/Vue/vue-cli"
-alias vt="cd ~/Vue/vue-cli/packages/test"
-alias vo="cd ~/Vue/vuejs.org"
-alias vr="cd ~/Vue/vue-router"
-alias vx="cd ~/Vue/vuex"
-alias vd="cd ~/Vue/vue-devtools"
-alias vl="cd ~/Vue/vue-loader"
-alias vw="cd ~/Vue/vue-templates/test/"
-alias vp="cd ~/Vue/vuepress"
 alias p="cd ~/Personal"
-alias r="cd ~/Research"
-alias wx="cd ~/Weex"
 alias mw="cd ~/Work"
 
 # recursively delete .DS_Store

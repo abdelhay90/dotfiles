@@ -19,6 +19,29 @@ git clone https://github.com/abdelhay90/dotfiles ~/.dotfiles && ~/.dotfiles/boot
 
 Tested on Ubuntu 24.04 and Fedora 41 containers and on macOS.
 
+## Dev toolchain
+
+`setup-dev.sh` installs the dev environment on macOS and Linux (apt, dnf, pacman). It is idempotent
+and edits no rc files, because the PATH wiring lives in `bash/.profile`.
+
+```bash
+./setup-dev.sh            # everything
+./setup-dev.sh go rust    # only some tools
+./setup-dev.sh check      # show what is installed, change nothing
+```
+
+| Tool | How |
+|------|-----|
+| base | compilers, openssl/zlib headers, git, curl, jq, ripgrep (Homebrew on macOS) |
+| node | nvm (pinned) + Node LTS |
+| pnpm | `npm install -g pnpm` into the default Node |
+| java | JDK 21 + jenv + Maven (+ Gradle on macOS; projects ship `./gradlew`) |
+| go | Homebrew on macOS, official tarball in `~/.local/go` on Linux |
+| rust | rustup, stable with clippy and rustfmt |
+| python | uv + Python 3.12 (`uv python install`, no compiling) |
+
+Override versions with `JAVA_VERSION=21 PYTHON_VERSION=3.12 NVM_VERSION=v0.40.3`.
+
 ## Secrets
 
 Tokens/API keys live in `bash/.secrets`, which is git-ignored and loaded first by `.profile`.
@@ -47,6 +70,7 @@ secrets (including `bash/.secrets` itself) and runs shellcheck on the staged she
 | `bash/.prompt` | prompt with branch + dirty marker |
 | `bash/.osx`, `bash/.linux` | OS-specific settings, picked by `$OSTYPE` |
 | `bash/.hints` | cheat sheet, run `hint` |
+| `bootstrap.sh`, `setup-dev.sh` | shell setup, then developer toolchain |
 
 The iTerm2 color scheme in `iterm/` is imported by hand (bootstrap prints where).
 

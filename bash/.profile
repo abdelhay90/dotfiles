@@ -73,6 +73,7 @@ path_add "$HOME/.local/bin"
 path_add "$HOME/.cargo/bin"
 path_add "$HOME/.jbang/bin"
 path_add "$HOME/.juliaup/bin"
+path_add "$HOME/.local/go/bin" after   # Go tarball install on Linux (setup-dev.sh)
 path_add "$GOPATH/bin" after
 
 # nvm, lazy: put the default node on PATH now (cheap), load nvm itself only when `nvm` is called.
@@ -91,6 +92,22 @@ if [ -s "$NVM_DIR/nvm.sh" ]; then
         [ -n "$BASH_VERSION" ] && [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
         nvm "$@"
     }
+fi
+
+# jenv: put shims on PATH; the full `jenv init` costs ~280ms, so run it lazily on the first `jenv` call.
+# JAVA_HOME follows jenv's global version (read from a file, no fork).
+# ponytail: per-directory .java-version files are not reflected in JAVA_HOME; use full `jenv init` if needed.
+if [ -d "$HOME/.jenv/versions" ]; then
+    path_add "$HOME/.jenv/bin"
+    path_add "$HOME/.jenv/shims"
+    jenv() {
+        unset -f jenv
+        eval "$(command jenv init - --no-rehash "$([ -n "$ZSH_VERSION" ] && echo zsh || echo bash)")"
+        jenv "$@"
+    }
+    _jv=$(<"$HOME/.jenv/version") 2>/dev/null
+    [ -n "$_jv" ] && [ -d "$HOME/.jenv/versions/$_jv" ] && export JAVA_HOME="$HOME/.jenv/versions/$_jv"
+    unset _jv
 fi
 
 # Claude Code

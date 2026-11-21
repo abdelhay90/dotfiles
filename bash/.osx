@@ -11,14 +11,8 @@
 export CLICOLOR=1
 export LSCOLORS=ExGxdxDxCxegedhbadaced
 
-# JDK: with jenv, `java` comes from its shims (on PATH via ~/.zshrc) and JAVA_HOME follows jenv's
-# global version (read from a file: no fork). ponytail: per-directory .java-version files are not
-# reflected in JAVA_HOME; run `jenv shell`/full `jenv init` if a tool needs that.
-if [ -d "$HOME/.jenv/versions" ]; then
-    _jv=$(<"$HOME/.jenv/version") 2>/dev/null
-    [ -n "$_jv" ] && [ -d "$HOME/.jenv/versions/$_jv" ] && export JAVA_HOME="$HOME/.jenv/versions/$_jv"
-    unset _jv
-elif [ -d /Library/Java/JavaVirtualMachines/openjdk-21.jdk/Contents/Home ]; then
+# JDK fallback when jenv is not installed (with jenv, bash/.profile sets JAVA_HOME)
+if [ ! -d "$HOME/.jenv/versions" ] && [ -d /Library/Java/JavaVirtualMachines/openjdk-21.jdk/Contents/Home ]; then
     export JAVA_HOME=/Library/Java/JavaVirtualMachines/openjdk-21.jdk/Contents/Home
     path_add "$JAVA_HOME/bin" after
 fi

@@ -1,3 +1,6 @@
-# Local secrets - never commit.
-bash/.secrets
+# Local secrets - never commit. Template stays tracked.
+bash/.secrets*
+!bash/.secrets.example
+.env
+.env.*
 .DS_Store

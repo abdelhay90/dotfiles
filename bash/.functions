@@ -23,7 +23,7 @@ j() {
 }
 
 mark() {
-    mkdir -p "$MARKPATH"; ln -s "$PWD" "$MARKPATH/$1"
+    mkdir -p "$MARKPATH"; ln -sfn "$PWD" "$MARKPATH/$1"
 }
 
 unmark() {
@@ -75,6 +75,11 @@ extract() {
         case "$1" in
             *.tar.bz2)  tar -jxvf "$1"                        ;;
             *.tar.gz)   tar -zxvf "$1"                        ;;
+            *.tar.xz)   tar -Jxvf "$1"                        ;;
+            *.txz)      tar -Jxvf "$1"                        ;;
+            *.xz)       unxz "$1"                             ;;
+            *.7z)       7z x "$1"                             ;;
+            *.rar)      unrar x "$1"                          ;;
             *.bz2)      bunzip2 "$1"                          ;;
             *.dmg)      hdiutil mount "$1"                    ;;
             *.gz)       gunzip "$1"                           ;;
@@ -135,4 +140,19 @@ rename_git_branch() {
         line
     fi
     echo "Done!"
+}
+
+# regenerate the BFF API client (run from the UI repo root)
+update_bff_api() {
+    local sep="-------------------------------------------------------------"
+    echo "pnpm generate:clean"; pnpm generate:clean || return
+    echo "$sep"
+    echo "pnpm generate:auth"; pnpm generate:auth || return
+    echo "$sep"
+    echo 'update swagger.json file and remove "<>",'
+    sed -i.bak 's/"<>",//g' ./swagger.json && rm -f ./swagger.json.bak || return
+    echo "$sep"
+    echo "pnpm generate:bff"; pnpm generate:bff || return
+    echo "$sep"
+    echo "Happy hacking!"
 }

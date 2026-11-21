@@ -11,20 +11,26 @@ ORANGE=$(tput setaf 172 2>/dev/null)
 PURPLE=$(tput setaf 141 2>/dev/null)
 RESET=$(tput sgr0 2>/dev/null)
 
+# GIT_OPTIONAL_LOCKS=0: never take the index lock from the prompt (avoids index.lock races)
+_pgit() { GIT_OPTIONAL_LOCKS=0 git "$@"; }
+
 function git_info() {
     # not in a git repo -> nothing
-    git rev-parse --is-inside-work-tree &>/dev/null || return
+    _pgit rev-parse --is-inside-work-tree &>/dev/null || return
 
     local branch
-    branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+    branch=$(_pgit symbolic-ref --short HEAD 2>/dev/null)
     # detached HEAD
-    [ -z "$branch" ] && branch=$(git rev-parse --short HEAD 2>/dev/null)
+    [ -z "$branch" ] && branch=$(_pgit rev-parse --short HEAD 2>/dev/null)
 
     # dirty = tracked files changed. Much faster than `status` in huge repos;
     # ponytail: ignores untracked files, switch to `git status --porcelain` if you want them.
-    # (`git diff` refreshes stat info; `diff-index` alone reports false positives after touch/checkout)
+    # (`_pgit diff` refreshes stat info; `diff-index` alone reports false positives after touch/checkout)
+    # (no commits yet -> HEAD missing -> not dirty)
     local dirty=""
-    git diff --quiet HEAD -- 2>/dev/null || dirty="${LIGHTRED}*"
+    if _pgit rev-parse -q --verify HEAD >/dev/null 2>&1; then
+        _pgit diff --quiet HEAD -- 2>/dev/null || dirty="${LIGHTRED}*"
+    fi
 
     echo " ${PURPLE}(${branch}${dirty}${PURPLE})"
 }

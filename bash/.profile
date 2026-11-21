@@ -21,19 +21,22 @@ fi
 [[ $- == *i* ]] && . "$BASH_SRC_PATH/.prompt"
 
 # Homebrew first so later path_add entries sit in front of system paths.
-# `brew shellenv` is slow (~50ms), so cache its output; it is static for a given install.
+# Live `brew shellenv` on purpose (~50ms): it is shell-specific and sets the zsh fpath array per
+# shell instance, so its output can't be cached. Its unconditional PATH/INFOPATH prepends are
+# stripped and redone idempotently, so re-sourcing (rl) doesn't duplicate entries.
 for _brew in /opt/homebrew/bin/brew /home/linuxbrew/.linuxbrew/bin/brew "$HOME/.linuxbrew/bin/brew"; do
     if [ -x "$_brew" ]; then
-        _brew_env="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles/brew-shellenv.sh"
-        if [ ! -s "$_brew_env" ] || [ "$_brew" -nt "$_brew_env" ]; then
-            mkdir -p "$(dirname "$_brew_env")" && "$_brew" shellenv > "$_brew_env"
-        fi
-        # shellcheck source=/dev/null
-        . "$_brew_env"
+        eval "$("$_brew" shellenv | grep -vE '^export (PATH|INFOPATH)=')"
+        path_add "$HOMEBREW_PREFIX/sbin"
+        path_add "$HOMEBREW_PREFIX/bin"
+        case ":${INFOPATH:-}:" in
+            *":$HOMEBREW_PREFIX/share/info:"*) ;;
+            *) export INFOPATH="$HOMEBREW_PREFIX/share/info:${INFOPATH:-}" ;;
+        esac
         break
     fi
 done
-unset _brew _brew_env
+unset _brew
 
 # System specific
 case $OSTYPE in
@@ -67,14 +70,19 @@ unset _mvn
 path_add "$PNPM_HOME"
 path_add "$BUN_INSTALL/bin"
 path_add "$HOME/.local/bin"
+path_add "$HOME/.cargo/bin"
+path_add "$HOME/.jbang/bin"
+path_add "$HOME/.juliaup/bin"
 path_add "$GOPATH/bin" after
 
 # nvm, lazy: put the default node on PATH now (cheap), load nvm itself only when `nvm` is called.
-# ponytail: default alias matched as a version prefix ("22" -> newest v22.x); aliases like "lts/*" won't resolve.
+# ponytail: default alias matched as a version prefix ("22" -> newest v22.x); anything else (lts/*, node) -> newest installed.
 export NVM_DIR="$HOME/.nvm"
 if [ -s "$NVM_DIR/nvm.sh" ]; then
     _nvm_default=$(cat "$NVM_DIR/alias/default" 2>/dev/null)
     _d=$(find "$NVM_DIR/versions/node" -maxdepth 1 -name "v${_nvm_default#v}*" 2>/dev/null | sort -V | tail -1)
+    # alias like "lts/*" or "node" matches no directory: fall back to the newest installed version
+    [ -n "$_d" ] || _d=$(find "$NVM_DIR/versions/node" -maxdepth 1 -name 'v*' 2>/dev/null | sort -V | tail -1)
     [ -n "$_d" ] && path_add "$_d/bin"
     unset _nvm_default _d
     nvm() {
@@ -84,3 +92,6 @@ if [ -s "$NVM_DIR/nvm.sh" ]; then
         nvm "$@"
     }
 fi
+
+# Claude Code
+export ENABLE_LSP_TOOL=1

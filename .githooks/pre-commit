@@ -16,12 +16,17 @@ if git diff --cached -U0 -- . ':!.githooks' |
     exit 1
 fi
 
-# lint staged content (not the working tree), incl. this hook
+# lint staged content (not the working tree), incl. this hook; NUL-separated so odd names are safe
 rc=0
-for f in $(git diff --cached --name-only --diff-filter=ACM | grep -E '^bash/\.[a-z_.]+$|\.sh$|^\.githooks/' | grep -vE '\.hints$'); do
+while IFS= read -r -d '' f; do
+    case $f in
+        bash/.hints) continue ;;
+        bash/.*|*.sh|.githooks/*) ;;
+        *) continue ;;
+    esac
     if ! out=$(git show ":$f" | shellcheck -s bash --severity=warning -e SC1091,SC2148 --format=gcc -); then
         echo "${out//<stdin>/$f}" >&2
         rc=1
     fi
-done
+done < <(git diff --cached --name-only --diff-filter=ACM -z)
 exit $rc

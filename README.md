@@ -30,6 +30,9 @@ Prefer scoping a secret to one command (see the `claude()` wrapper pattern in th
 global `export`, so child processes don't inherit it. `.profile` warns if `.secrets` is readable by
 others.
 
+Note: the `claude()` wrapper only applies to interactive shells that sourced `.secrets`. Scripts, cron
+and IDE-launched tools won't see the token; use a plain `export` in `.secrets` if you need that.
+
 A pre-commit hook (`git config core.hooksPath .githooks`, done by `bootstrap.sh`) blocks staged
 secrets (including `bash/.secrets` itself) and runs shellcheck on the staged shell files.
 
@@ -45,3 +48,9 @@ secrets (including `bash/.secrets` itself) and runs shellcheck on the staged she
 | `bash/.hints` | cheat sheet, run `hint` |
 
 Also in the repo: an iTerm2 color scheme (`iterm/`) and a font (`fonts/`), imported by hand.
+
+## Credits
+
+Started from [yyx990803/dotfiles](https://github.com/yyx990803/dotfiles). The `mark`/`j` functions come
+from Jeroen Janssens, `extract` from nparikh.org. No license file: the upstream repo has none, so
+check before reusing code from here.

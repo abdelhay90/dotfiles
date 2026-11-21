@@ -16,6 +16,12 @@ if [ -d /Library/Java/JavaVirtualMachines/openjdk-21.jdk/Contents/Home ]; then
     path_add "$JAVA_HOME/bin" after
 fi
 
+# Homebrew keg-only tools (only added if installed)
+for _k in libpq gradle@8 openjdk@21; do
+    path_add "${HOMEBREW_PREFIX:-/opt/homebrew}/opt/$_k/bin"
+done
+unset _k
+
 # common places
 alias p="cd ~/Personal"
 alias mw="cd ~/Work"

@@ -50,8 +50,8 @@ export LSCOLORS=ExGxdxDxCxegedhbadaced
 # export EDITOR='code'
 # export VISUAL="$EDITOR"
 # export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_261.jdk/Contents/Home
-export JAVA_HOME=/Library/Java/JavaVirtualMachines/openlogic-openjdk-8.jdk/Contents/Home
-# export JAVA_HOME=/Library/Java/JavaVirtualMachines/openlogic-openjdk-21.jdk/Contents/Home
+# export JAVA_HOME=/Library/Java/JavaVirtualMachines/openlogic-openjdk-8.jdk/Contents/Home
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/openjdk-21.jdk/Contents/Home
 export PATH=$PATH:$JAVA_HOME/bin
 
 # common places
@@ -62,20 +62,7 @@ alias mw="cd ~/Work"
 alias dsstore="find . -name '*.DS_Store' -type f -ls -delete"
 
 # recursively delete node_modules
-alias nodemodules="find . -name "node_modules" -exec rm -rf '{}' +"
+alias nodemodules="find . -name node_modules -type d -prune -exec rm -rf '{}' +"
 
 # hint for these shortcuts
 alias hint="echo; cat $BASH_SRC_PATH/.hints; echo; echo"
-
-# shortcut for uploading quick static files to VPS
-function sketch() {
-    scp -r $1 evan@do:/srv/static/sketch/$2
-}
-
-alias i="issue"
-function issue() {
-  FILE="/Users/evan/Vue/vue/explorations/$1.html"
-  touch $FILE
-  open $FILE
-  subl $FILE
-}

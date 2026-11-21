@@ -9,7 +9,7 @@ function j {
     if [ -z "$1" ]; then
         marks
     else
-        cd -P $MARKPATH/$1 2>/dev/null || echo "No such mark: $1"
+        cd -P "$MARKPATH/$1" 2>/dev/null || echo "No such mark: $1"
     fi
 }
 
@@ -20,11 +20,11 @@ function _jump() {
 # complete -F _jump j
 
 function mark { 
-    mkdir -p $MARKPATH; ln -s $(pwd) $MARKPATH/$1
+    mkdir -p "$MARKPATH"; ln -s "$PWD" "$MARKPATH/$1"
 }
 
 function unmark { 
-    rm -i $MARKPATH/$1 
+    rm -i "$MARKPATH/$1" 
 }
 
 function marks {
@@ -36,11 +36,15 @@ function md() {
   mkdir -p "$@" && cd "$@"
 }
 
-# clean the current directory
+# clean the current directory (confirms, shows path, refuses $HOME and /)
 function clean() {
-    read -p "remove everything here? (y/N)" yn
-    if [ $yn = "y" ]; then
-        rm -rf ./* ./.*
+    if [ "$PWD" = "$HOME" ] || [ "$PWD" = "/" ]; then
+        echo "refusing to clean $PWD"; return 1
+    fi
+    local yn
+    read -r -p "remove everything in $PWD? (y/N) " yn
+    if [ "$yn" = "y" ]; then
+        find . -mindepth 1 -delete
     fi
 }
 
@@ -81,8 +85,10 @@ extract () {
     fi
 }
 
+# delete local branches whose remote is gone; pass -D to force (default -d)
 function gclean() {
-  git fetch -ap && git branch -avv | grep -i  ": gone]" | awk '{print $1}' | xargs git branch $@
+  git fetch -ap || return
+  git branch -vv | awk '/: gone]/{print $1}' | xargs -r git branch "${1:--d}"
 }
 
 function prune_git_history() {
@@ -99,49 +105,37 @@ function line () {
     echo "----------------------------------------"
 }
 
-function rename_git_branch(){
-    set -e
-    # echo an error message before exiting
-    trap 'echo "\"${last_command}\" command filed with exit code $?."' EXIT
-    echo "Checking out the old branch"
-    echo "git checkout $1" 
-    git checkkout $1
+# usage: rename_git_branch <old> <new> [-r]   (-r also deletes the old remote branch)
+function rename_git_branch() {
+    if [ $# -lt 2 ]; then echo "usage: rename_git_branch <old> <new> [-r]"; return 1; fi
+    echo "git checkout $1"
+    git checkout "$1" || return
     line
-    echo "Renaming branch"
     echo "git branch -m $2"
-    git branch -m $2
+    git branch -m "$2" || return
     line
-    echo "Pushing branch with new name to remote"
     echo "git push origin -u $2"
-    git push origin -u $2
+    git push origin -u "$2" || return
     line
-    if [ $3 = "-r" ]
-    then
-        echo "Deleting remote branch with old name"
+    if [ "$3" = "-r" ]; then
         echo "git push origin --delete $1"
-        git push origin --delete $1
+        git push origin --delete "$1" || return
         line
     fi
     echo "Done!"
 }
 
-function update_bff_api()  {
-    echo "pnpm generate:clean"
-    pnpm generate:clean
-    sleep 4
-    echo "-------------------------------------------------------------"
-    echo "pnpm generate:auth"
-    pnpm generate:auth
-    sleep 4
-    echo "-------------------------------------------------------------"
-    echo "update swagger.json file and remove \"<>\","
-    sed -i '' 's/"<>",//g' ./swagger.json
-    sleep 4
-    echo "-------------------------------------------------------------"
-    echo "pnpm generate:bff"
-    pnpm generate:bff
-    sleep 4
-    echo "-------------------------------------------------------------"
+function update_bff_api() {
+    local sep="-------------------------------------------------------------"
+    echo "pnpm generate:clean"; pnpm generate:clean || return; sleep 4
+    echo "$sep"
+    echo "pnpm generate:auth"; pnpm generate:auth || return; sleep 4
+    echo "$sep"
+    echo 'update swagger.json file and remove "<>",'
+    sed -i '' 's/"<>",//g' ./swagger.json || return; sleep 4
+    echo "$sep"
+    echo "pnpm generate:bff"; pnpm generate:bff || return; sleep 4
+    echo "$sep"
     echo "Happy hacking!"
 }
 
@@ -153,6 +147,7 @@ function update_bff_api()  {
 #     # pwd
 # }
 
+# copy stdin to clipboard without the trailing newline
 function xclip() {
-  head -c -1 | pbcopy "$@"
+  printf %s "$(cat)" | pbcopy
 }

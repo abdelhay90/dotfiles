@@ -141,18 +141,3 @@ rename_git_branch() {
     fi
     echo "Done!"
 }
-
-# regenerate the BFF API client (run from the UI repo root)
-update_bff_api() {
-    local sep="-------------------------------------------------------------"
-    echo "pnpm generate:clean"; pnpm generate:clean || return
-    echo "$sep"
-    echo "pnpm generate:auth"; pnpm generate:auth || return
-    echo "$sep"
-    echo 'update swagger.json file and remove "<>",'
-    sed -i.bak 's/"<>",//g' ./swagger.json && rm -f ./swagger.json.bak || return
-    echo "$sep"
-    echo "pnpm generate:bff"; pnpm generate:bff || return
-    echo "$sep"
-    echo "Happy hacking!"
-}

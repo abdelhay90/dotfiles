@@ -14,7 +14,7 @@ path_add() {
 # with some modifications: completion, show marks if no args given, make marks work on OS X 10.8.
 export MARKPATH=$HOME/.marks
 
-function j {
+j() {
     if [ -z "$1" ]; then
         marks
     else
@@ -22,42 +22,47 @@ function j {
     fi
 }
 
-function mark { 
+mark() {
     mkdir -p "$MARKPATH"; ln -s "$PWD" "$MARKPATH/$1"
 }
 
-function unmark { 
-    rm -i "$MARKPATH/$1" 
+unmark() {
+    rm -i "$MARKPATH/$1"
 }
 
-function marks {
-    ls -l $MARKPATH | sed 's/  / /g' | cut -d' ' -f9- && echo
+marks() {
+    local n
+    ls -1 "$MARKPATH" 2>/dev/null | while read -r n; do
+        printf '%s -> %s\n' "$n" "$(readlink "$MARKPATH/$n")"
+    done
+    echo
 }
 
 # Create a new directory and enter it
-function md() {
+md() {
   mkdir -p "$1" && cd "$1" || return
 }
 
 # clean the current directory (confirms, shows path, refuses $HOME and /)
-function clean() {
+clean() {
     if [ "$PWD" = "$HOME" ] || [ "$PWD" = "/" ]; then
         echo "refusing to clean $PWD"; return 1
     fi
     local yn
-    read -r -p "remove everything in $PWD? (y/N) " yn
+    printf "remove everything in %s? (y/N) " "$PWD"
+    read -r yn
     if [ "$yn" = "y" ]; then
         find . -mindepth 1 -delete
     fi
 }
 
 # check file size
-function fs() {
+fs() {
     du -sh "${1}" | awk '{print $1}'
 }
 
 # check processes using a port
-function port() {
+port() {
     lsof -iTCP:"$1" -sTCP:LISTEN
 }
 
@@ -65,7 +70,7 @@ function port() {
 # Usage: extract <file>
 # Description: extracts archived files / mounts disk images
 # Note: .dmg/hdiutil is Mac OS X-specific.
-extract () {
+extract() {
     if [ -f "$1" ]; then
         case "$1" in
             *.tar.bz2)  tar -jxvf "$1"                        ;;
@@ -89,27 +94,31 @@ extract () {
 }
 
 # delete local branches whose remote is gone; pass -D to force (default -d)
-function gclean() {
+gclean() {
   git fetch -ap || return
-  git branch -vv | awk '/: gone]/{print $1}' | xargs -r git branch "${1:--d}"
+  local cur
+  cur=$(git branch --show-current)
+  git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads |
+    awk -v cur="$cur" '$2 == "[gone]" && $1 != cur {print $1}' |
+    xargs -r git branch "${1:--d}"
 }
 
-function prune_git_history() {
-    echo "prunnig and removing unrefrenced blobs from local history."
+prune_git_history() {
+    echo "pruning and removing unreferenced blobs from local history."
     echo "git gc --prune=now"
     git gc --prune=now
-    echo "deleteing branches references to remote branches that do not exist."
+    echo "deleting references to remote branches that do not exist."
     echo "git remote prune origin"
     git remote prune origin
     echo "Done."
 }
 
-function line () {
+line() {
     echo "----------------------------------------"
 }
 
 # usage: rename_git_branch <old> <new> [-r]   (-r also deletes the old remote branch)
-function rename_git_branch() {
+rename_git_branch() {
     if [ $# -lt 2 ]; then echo "usage: rename_git_branch <old> <new> [-r]"; return 1; fi
     echo "git checkout $1"
     git checkout "$1" || return
@@ -127,4 +136,3 @@ function rename_git_branch() {
     fi
     echo "Done!"
 }
-

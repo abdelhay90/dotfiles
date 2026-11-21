@@ -1,0 +1,16 @@
+#!/bin/bash
+# Incorta work aliases. Loaded by .profile only when ~/Work/incorta exists.
+
+# go to cmc ui repo
+alias cmc-ui="cd ~/Work/incorta/backend/incorta.cmc/ui"
+alias kamel="cd ~/Work/incorta/kamel/ && ./kamel.sh || cd -"
+
+alias run-loader-d="./gradlew -PwarFast :incortaWar:farmRunWarLoader --debug"
+alias run-analytics-d="./gradlew clean -x check -PwarFast :incortaWar:war && ./gradlew :incortaWar:farmRunWarAnalytics -x war --debug"
+alias start-zk="~/IncortaAnalytics/IncortaNode/start-zookeeper.sh"
+alias inc="./incorta-docker.sh"
+alias inc-down-a="./incorta-docker.sh down-all"
+alias inc-down="./incorta-docker.sh down"
+alias inc-analytics-d="./incorta-docker.sh analytics-debug"
+alias inc-loader-d="./incorta-docker.sh loader-debug"
+alias inc-cmc-d="./incorta-docker.sh cmc-debug"

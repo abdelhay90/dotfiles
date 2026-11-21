@@ -2,7 +2,7 @@
 
 if [[ $COLORTERM = gnome-* && $TERM = xterm ]] && infocmp gnome-256color >/dev/null 2>&1; then
     export TERM=gnome-256color
-elif infocmp xterm-256color >/dev/null 2>&1; then
+elif [[ $TERM = xterm ]] && infocmp xterm-256color >/dev/null 2>&1; then
     export TERM=xterm-256color
 fi
 
@@ -20,10 +20,11 @@ function git_info() {
     # detached HEAD
     [ -z "$branch" ] && branch=$(git rev-parse --short HEAD 2>/dev/null)
 
-    # dirty = tracked files changed. diff-index is much faster than `status` in huge repos;
+    # dirty = tracked files changed. Much faster than `status` in huge repos;
     # ponytail: ignores untracked files, switch to `git status --porcelain` if you want them.
+    # (`git diff` refreshes stat info; `diff-index` alone reports false positives after touch/checkout)
     local dirty=""
-    git diff-index --quiet HEAD -- 2>/dev/null || dirty="${LIGHTRED}*"
+    git diff --quiet HEAD -- 2>/dev/null || dirty="${LIGHTRED}*"
 
     echo " ${PURPLE}(${branch}${dirty}${PURPLE})"
 }
@@ -41,7 +42,7 @@ if [ -n "$ZSH_VERSION" ]; then
     term_title=$'%{\033]2;%~\007\033]1;%1d\007%}'
     # single quotes: $(...) and $ORANGE are expanded at prompt time, not now
     PS1="${term_title}"'$(usernamehost)%{$ORANGE%}%~$(git_info)%{$RESET%}
- '
+$ '
     unset term_title
 else
     # \w = cwd, \W = basename; \[ \] marks zero-width escapes

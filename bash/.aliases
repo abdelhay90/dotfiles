@@ -44,12 +44,6 @@ alias gcp="git cherry-pick"
 alias gbg="git bisect good"
 alias gbb="git bisect bad"
 
-# blogging shortcuts
-alias hs="hexo server"
-alias hd="rm db.json && hexo generate && hexo deploy"
-alias blog="cd ~/Personal/blog && subl . && hexo server"
-alias rnm="rm -rf ./node_modules"
-
 # npm shortcuts that only list top-level modules
 alias l="yarn list --depth=0 2>/dev/null"
 alias lg="npm list -g --depth=0 2>/dev/null"
@@ -57,18 +51,6 @@ alias lg="npm list -g --depth=0 2>/dev/null"
 # process finding
 alias pg="pgrep -lf"
 
-# go to cmc ui repo
-alias cmc-ui="cd ~/Work/incorta/backend/incorta.cmc/ui"
-
-alias run-loader-d="./gradlew -PwarFast :incortaWar:farmRunWarLoader --debug"
-alias run-analytics-d="./gradlew clean -x check -PwarFast :incortaWar:war && ./gradlew :incortaWar:farmRunWarAnalytics -x war --debug"
-alias start-zk="~/IncortaAnalytics/IncortaNode/start-zookeeper.sh"
-alias git-prune-history="git gc --prune=now && git remote prune origin"
-
-# --------------------------------------------------------------------------------------------------------
-alias inc="./incorta-docker.sh"
-alias inc-down-a="./incorta-docker.sh down-all"
-alias inc-down="./incorta-docker.sh down"
-alias inc-analytics-d="./incorta-docker.sh analytics-debug"
-alias inc-loader-d="./incorta-docker.sh loader-debug"
-alias inc-cmc-d="./incorta-docker.sh cmc-debug"
+# hint for these shortcuts
+# shellcheck disable=SC2139  # expand path at definition time on purpose
+alias hint="echo; cat $BASH_SRC_PATH/.hints; echo; echo"

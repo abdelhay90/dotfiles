@@ -14,17 +14,13 @@ OS=$(uname -s)
 log() { printf '\n==> %s\n' "$*"; }
 
 # ---- 1. locate the repo (the dir this script lives in), expose it as ~/.dotfiles
-here=$(cd -P "$(dirname "${BASH_SOURCE[0]:-}")" 2>/dev/null && pwd -P || true)
-if [ -n "$here" ] && [ -f "$here/bash/.profile" ]; then
-    if [ ! -e "$DOTFILES" ]; then
-        ln -s "$here" "$DOTFILES"
-    elif [ "$(cd -P "$DOTFILES" && pwd -P)" != "$here" ]; then
-        echo "$DOTFILES exists and is not this repo ($here). Move it and re-run." >&2
-        exit 1
-    fi
-else  # piped from curl: no local repo yet
-    [ -d "$DOTFILES/.git" ] || git clone "$REPO_URL" "$DOTFILES"
-    here=$(cd -P "$DOTFILES" && pwd -P)
+here=$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)
+[ -f "$here/bash/.profile" ] || { echo "run bootstrap.sh from a clone of $REPO_URL" >&2; exit 1; }
+if [ ! -e "$DOTFILES" ]; then
+    ln -s "$here" "$DOTFILES"
+elif [ "$(cd -P "$DOTFILES" && pwd -P)" != "$here" ]; then
+    echo "$DOTFILES exists and is not this repo ($here). Move it and re-run." >&2
+    exit 1
 fi
 
 # ---- 2. packages
@@ -40,13 +36,14 @@ case "$OS" in
         brew install git shellcheck
         if [ -z "${SKIP_APPS:-}" ]; then
             apps=(iterm2 google-chrome)   # edit to taste
-            brew install --cask "${apps[@]}"
+            # non-fatal: an app installed outside Homebrew makes `brew install --cask` fail
+            brew install --cask "${apps[@]}" || echo "warning: some apps failed to install (already present?)" >&2
         fi
         ;;
     Linux)
         SUDO=""
         if [ "$(id -u)" -ne 0 ]; then
-            command -v sudo >/dev/null && SUDO=sudo || { echo "need root or sudo to install packages" >&2; exit 1; }
+            if command -v sudo >/dev/null; then SUDO=sudo; else echo "need root or sudo to install packages" >&2; exit 1; fi
         fi
         if command -v apt-get >/dev/null; then
             export DEBIAN_FRONTEND=noninteractive
@@ -69,11 +66,11 @@ export NVM_DIR="$HOME/.nvm"
 if [ ! -s "$NVM_DIR/nvm.sh" ]; then
     curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/$NVM_VERSION/install.sh" | PROFILE=/dev/null bash
 fi
-if [ ! -d "$NVM_DIR/versions/node" ] || [ -z "$(ls -A "$NVM_DIR/versions/node" 2>/dev/null)" ]; then
+if [ -z "$(find "$NVM_DIR/versions/node" -maxdepth 1 -name 'v*' 2>/dev/null)" ]; then
     set +u; . "$NVM_DIR/nvm.sh"
     nvm install --lts
     # concrete version: ~/.dotfiles/bash/.profile resolves the default alias as a version prefix
-    nvm alias default "$(ls "$NVM_DIR/versions/node" | sort -V | tail -1)"
+    nvm alias default "$(basename "$(find "$NVM_DIR/versions/node" -maxdepth 1 -name 'v*' | sort -V | tail -1)")"
     set -u
 fi
 

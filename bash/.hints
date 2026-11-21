@@ -1,5 +1,5 @@
-gs/ga/gc/gcm   git status / add -A . / commit / commit -m
-gb/gcb/gco     git branch / current branch / checkout
+gs/ga/gap/gc   git status / add -A . / add -p / commit
+gcm/gb/gcb/gco commit -m / branch / current branch / checkout
 gg             pretty graph log
 gclean [-D]    delete local branches whose remote is gone
 la / ll        list incl. dotfiles / detailed

@@ -14,7 +14,8 @@ git clone https://github.com/abdelhay90/dotfiles ~/.dotfiles && ~/.dotfiles/boot
 2. installs git, shellcheck (and Homebrew + GUI apps on macOS; `SKIP_APPS=1` skips the apps),
 3. installs nvm (pinned) and a default Node LTS,
 4. enables the pre-commit hook and creates `bash/.secrets` from the template,
-5. adds `. ~/.dotfiles/bash/.profile` to your shell's rc file (`~/.zshrc`, `~/.bash_profile` on macOS, `~/.bashrc` on Linux).
+5. copies the fonts in `fonts/` to your user font directory,
+6. adds `. ~/.dotfiles/bash/.profile` to your shell's rc file (`~/.zshrc`, `~/.bash_profile` on macOS, `~/.bashrc` on Linux).
 
 Tested on Ubuntu 24.04 and Fedora 41 containers and on macOS.
 
@@ -47,7 +48,7 @@ secrets (including `bash/.secrets` itself) and runs shellcheck on the staged she
 | `bash/.osx`, `bash/.linux` | OS-specific settings, picked by `$OSTYPE` |
 | `bash/.hints` | cheat sheet, run `hint` |
 
-Also in the repo: an iTerm2 color scheme (`iterm/`) and a font (`fonts/`), imported by hand.
+The iTerm2 color scheme in `iterm/` is imported by hand (bootstrap prints where).
 
 ## Credits
 

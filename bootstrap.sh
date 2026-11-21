@@ -84,6 +84,14 @@ if [ ! -e "$here/bash/.secrets" ]; then
 fi
 mkdir -p "$HOME/Personal" "$HOME/Work"
 
+# fonts (copied only if missing)
+if [ "$OS" = Darwin ]; then fontdir="$HOME/Library/Fonts"; else fontdir="${XDG_DATA_HOME:-$HOME/.local/share}/fonts"; fi
+mkdir -p "$fontdir"
+for f in "$here"/fonts/*; do
+    [ -e "$fontdir/$(basename "$f")" ] || cp "$f" "$fontdir/"
+done
+if [ "$OS" = Linux ] && command -v fc-cache >/dev/null; then fc-cache -f "$fontdir" >/dev/null; fi
+
 # ---- 5. hook into the login shell's rc file
 case "$(basename "${SHELL:-bash}")" in
     zsh)  rc="$HOME/.zshrc" ;;
@@ -93,3 +101,6 @@ line='. ~/.dotfiles/bash/.profile'
 touch "$rc"
 grep -qxF "$line" "$rc" || echo "$line" >> "$rc"
 echo "Hooked into $rc. Open a new terminal."
+if [ "$OS" = Darwin ]; then
+    echo "iTerm2 colors: Settings > Profiles > Colors > Color Presets > Import > $here/iterm/*.itermcolors"
+fi

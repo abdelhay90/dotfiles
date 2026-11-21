@@ -1,83 +1,44 @@
-# Before running this script:
-# sudo chrown -R evan /usr/local
-# sudo echo '/usr/local/bin/bash' >> /etc/shells
+#!/bin/bash
+# Set up a macOS machine with these dotfiles. Safe to re-run.
+set -euo pipefail
 
-# make in case they aren't already there
-mkdir -p "/usr/local/lib"
-mkdir -p "/usr/local/bin"
+REPO=https://github.com/abdelhay90/dotfiles
+DOTFILES="$HOME/.dotfiles"
+NVM_VERSION=v0.40.3
 
-# Check for Homebrew,
-# Install if we don't have it
-if test ! $(which brew); then
-  echo "Installing homebrew..."
-  ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+# Homebrew
+if ! command -v brew >/dev/null; then
+    echo "Installing homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+[ -x /opt/homebrew/bin/brew ] && eval "$(/opt/homebrew/bin/brew shellenv)"
+brew update
+brew install git shellcheck
+
+# nvm (pinned version)
+if [ ! -s "$HOME/.nvm/nvm.sh" ]; then
+    echo "Installing nvm $NVM_VERSION..."
+    curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/$NVM_VERSION/install.sh" | PROFILE=/dev/null bash
 fi
 
-# Update homebrew recipes
-brew update
+# optional apps: edit to taste
+apps=(iterm2 google-chrome)
+brew install --cask "${apps[@]}"
 
-# Install and use latest bash
-brew install bash
-chsh -s /usr/local/bin/bash
+# this repo
+[ -d "$DOTFILES" ] || git clone "$REPO" "$DOTFILES"
+git -C "$DOTFILES" config core.hooksPath .githooks
 
-# Install git
-brew install git
-# Some git defaults
-git config --global color.ui true
-git config --global push.default simple
+# secrets: create your own from the template (never committed)
+if [ ! -e "$DOTFILES/bash/.secrets" ]; then
+    cp "$DOTFILES/bash/.secrets.example" "$DOTFILES/bash/.secrets"
+    chmod 600 "$DOTFILES/bash/.secrets"
+    echo "Created bash/.secrets - fill in your tokens."
+fi
 
-# Install nvm
-echo "Installing nvm..."
-curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
-nvm install stable
-nvm alias default stable
+mkdir -p ~/Personal ~/Work
 
-# Centralize global npm packages for different node versions
-echo "prefix = /usr/local" > ~/.npmrc
-
-# Install Node modules
-modules=(
-  grunt-cli
-  jasmine-node
-  gulp
-  phantomjs
-  casperjs
-  anywhere
-  webpack
-  browserify
-  watchify
-  bower
-  starz
-)
-
-echo "installing node modules..."
-npm install -g ${modules[@]}
-
-# Install Brew Cask
-echo "Installing brew cask..."
-brew install caskroom/cask/brew-cask
-
-# Apps
-apps=(
-  google-chrome
-  firefox
-  iterm2
-  sublime-text3
-  divvy
-)
-
-# Install apps to /Applications
-# Default is: /Users/$user/Applications
-echo "installing apps..."
-brew cask install --appdir="/Applications" ${apps[@]}
-
-# clone this repo
-git clone https://github.com/yyx990803/dotfiles ~/.dotfiles
-
-# Make some commonly used folders
-mkdir ~/Personal
-mkdir ~/Work
-
-# Source dot files
-echo '. ~/.dotfiles/bash/.profile' >> ~/.profile
-source ~/.profile
+# load dotfiles from zsh (macOS default shell)
+line='. ~/.dotfiles/bash/.profile'
+grep -qxF "$line" ~/.zshrc 2>/dev/null || echo "$line" >> ~/.zshrc
+echo "Done. Open a new terminal."

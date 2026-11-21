@@ -3,85 +3,48 @@
 if [[ $COLORTERM = gnome-* && $TERM = xterm ]] && infocmp gnome-256color >/dev/null 2>&1; then
     export TERM=gnome-256color
 elif infocmp xterm-256color >/dev/null 2>&1; then
-	export TERM=xterm-256color
+    export TERM=xterm-256color
 fi
 
-tput sgr0
 LIGHTRED=$(tput setaf 9)
 ORANGE=$(tput setaf 172)
 PURPLE=$(tput setaf 141)
-WHITE=$(tput setaf 256)
-BOLD=$(tput bold)
 RESET=$(tput sgr0)
 
-
-
-
 function git_info() {
-	# check if we're in a git repo
-	git rev-parse --is-inside-work-tree &>/dev/null || return
-	
-	# Get current branch name
-	local branch=$(git symbolic-ref --short HEAD 2>/dev/null)
-	if [ -z "$branch" ]; then
-		# Handle detached HEAD state
-		branch=$(git rev-parse --short HEAD 2>/dev/null)
-	fi
+    # not in a git repo -> nothing
+    git rev-parse --is-inside-work-tree &>/dev/null || return
 
-	# Check for dirty status
-	local dirty=""
-	if [[ -n $(git status --porcelain 2>/dev/null) ]]; then
-		dirty="${LIGHTRED}*"
-	fi
-	
-	# Output constructed string
-	# Note: In Zsh with PROMPT_SUBST, raw ANSI codes are usually okay-ish but strict length might be off.
-	# We'll use standard variables.
-	echo " ${PURPLE}(${branch}${dirty}${PURPLE})"
+    local branch
+    branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+    # detached HEAD
+    [ -z "$branch" ] && branch=$(git rev-parse --short HEAD 2>/dev/null)
+
+    # dirty = tracked files changed. diff-index is much faster than `status` in huge repos;
+    # ponytail: ignores untracked files, switch to `git status --porcelain` if you want them.
+    local dirty=""
+    git diff-index --quiet HEAD -- 2>/dev/null || dirty="${LIGHTRED}*"
+
+    echo " ${PURPLE}(${branch}${dirty}${PURPLE})"
 }
 
-# Only show username/host if not default
+# Only show user@host over SSH
 function usernamehost() {
-	if [ -n "$SSH_TTY" ]; then
-		echo "${PURPLE}$USER@$HOSTNAME${RESET} "
-	fi
+    if [ -n "$SSH_TTY" ]; then
+        echo "${PURPLE}$USER@$HOSTNAME${RESET} "
+    fi
 }
 
-# Shell Detection and Prompt Setting
 if [ -n "$ZSH_VERSION" ]; then
-	# ZSH Configuration
-	setopt PROMPT_SUBST
-	
-	# Zsh uses %F{code} for colors typically, but we have ANSI vars already.
-	# We wrap ANSI vars in %{ %} for zero-width.
-	
-	function zsh_color_wrapper() {
-		# Helper to wrap existing ANSI colors variables for Zsh if needed
-		# But since we're calling functions that echo them, strict wrapping is hard.
-		# For now, we use the ANSI codes directly.
-		:
-	}
-
-
-	# Title bar setting for Zsh
-	# %~ is CWD, %1d is basename
-	local term_title=$'%{\033]2;%~\007\033]1;%1d\007%}'
-	
-	# Use single quotes for the main prompt to defer evaluation of everything
-	# logical variables like ORANGE and functions like usernamehost will be expanded at prompt time
-	# %{%} wraps zero-width codes. variables must be expanded by the shell, so we use $ORANGE directly inside single quotes
-	
-	PS1="${term_title}"'$(usernamehost)%{$ORANGE%}%~$(git_info)%{$RESET%} 
+    setopt PROMPT_SUBST
+    # %~ = cwd, %1d = basename; %{ %} marks zero-width escapes (window/tab title)
+    term_title=$'%{\033]2;%~\007\033]1;%1d\007%}'
+    # single quotes: $(...) and $ORANGE are expanded at prompt time, not now
+    PS1="${term_title}"'$(usernamehost)%{$ORANGE%}%~$(git_info)%{$RESET%}
  '
+    unset term_title
 else
-	# BASH Configuration
-	
-	# Title bar: \033]2; ... \007
-	# Tab title: \033]1; ... \007
-	# \w is CWD, \W is basename
-	# Wrapped in \[ \] for zero-width
-	
-	TITLEBAR="\[\033]2;\w\007\]\[\033]1;\W\007\]"
-	PS1="${TITLEBAR}\$(usernamehost)\[$ORANGE\]\w\$(git_info)\[$RESET\]\n\$ "
+    # \w = cwd, \W = basename; \[ \] marks zero-width escapes
+    TITLEBAR="\[\033]2;\w\007\]\[\033]1;\W\007\]"
+    PS1="${TITLEBAR}\$(usernamehost)\[$ORANGE\]\w\$(git_info)\[$RESET\]\n\$ "
 fi
-

@@ -1,58 +1,18 @@
 #!/bin/bash
 
 # Configs for development machine
-echo 'OSX profile loaded.'
+[[ $- == *i* ]] && echo 'OSX profile loaded.'
 
-# A color scheme that loosely matches Ubuntu's default scheme.
-
-# The color designators are as follows:
-
-# a black
-# b red
-# c green
-# d brown
-# e blue
-# f magenta
-# g cyan
-# h light grey
-# A bold black, usually shows up as dark grey
-# B bold red
-# C bold green
-# D bold brown, usually shows up as yellow
-# E bold blue
-# F bold magenta
-# G bold cyan
-# H bold light grey; looks like bright white
-# x default foreground or background
-
-# Note that the above are standard ANSI colors. The actual
-# display may differ depending on the color capabilities of
-# the terminal in use.
-
-# The order of the attributes are as follows:
-
-# 1. directory
-# 2. symbolic link
-# 3. socket
-# 4. pipe
-# 5. executable
-# 6. block special
-# 7. character special
-# 8. executable with setuid bit set
-# 9. executable with setgid bit set
-# 10. directory writable to others, with sticky bit
-# 11. directory writable to others, without sticky bit
-
+# LSCOLORS designators (order of attributes: dir, symlink, socket, pipe, executable,
+# block special, char special, setuid exec, setgid exec, sticky+writable dir, writable dir)
+#   a black  b red  c green  d brown  e blue  f magenta  g cyan  h light grey
+#   capital = bold variant, x = default fg/bg
+# A color scheme that loosely matches Ubuntu's default scheme:
 export CLICOLOR=1
 export LSCOLORS=ExGxdxDxCxegedhbadaced
 
-# set default editor
-# export EDITOR='code'
-# export VISUAL="$EDITOR"
-# export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_261.jdk/Contents/Home
-# export JAVA_HOME=/Library/Java/JavaVirtualMachines/openlogic-openjdk-8.jdk/Contents/Home
 export JAVA_HOME=/Library/Java/JavaVirtualMachines/openjdk-21.jdk/Contents/Home
-export PATH=$PATH:$JAVA_HOME/bin
+path_add "$JAVA_HOME/bin" after
 
 # common places
 alias p="cd ~/Personal"
@@ -65,4 +25,5 @@ alias dsstore="find . -name '*.DS_Store' -type f -ls -delete"
 alias nodemodules="find . -name node_modules -type d -prune -exec rm -rf '{}' +"
 
 # hint for these shortcuts
+# shellcheck disable=SC2139  # expand path at definition time on purpose
 alias hint="echo; cat $BASH_SRC_PATH/.hints; echo; echo"

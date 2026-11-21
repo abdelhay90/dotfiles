@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# path_add DIR [after]: prepend (or append) DIR to PATH if it exists and is not there yet.
+# Safe to re-source (rl) without PATH growing.
+path_add() {
+    [ -d "$1" ] || return 0
+    case ":$PATH:" in *":$1:"*) return 0 ;; esac
+    if [ "$2" = after ]; then PATH="$PATH:$1"; else PATH="$1:$PATH"; fi
+    export PATH
+}
+
 # Jeroen Janssens' jumper functions
 # http://jeroenjanssens.com/2013/08/16/quickly-navigate-your-filesystem-from-the-command-line.html
 # with some modifications: completion, show marks if no args given, make marks work on OS X 10.8.
@@ -12,12 +21,6 @@ function j {
         cd -P "$MARKPATH/$1" 2>/dev/null || echo "No such mark: $1"
     fi
 }
-
-function _jump() {
-    local cur=${COMP_WORDS[COMP_CWORD]}
-    COMPREPLY=( $(compgen -W "$( ls $MARKPATH )" -- $cur) )
-}
-# complete -F _jump j
 
 function mark { 
     mkdir -p "$MARKPATH"; ln -s "$PWD" "$MARKPATH/$1"
@@ -33,7 +36,7 @@ function marks {
 
 # Create a new directory and enter it
 function md() {
-  mkdir -p "$@" && cd "$@"
+  mkdir -p "$1" && cd "$1" || return
 }
 
 # clean the current directory (confirms, shows path, refuses $HOME and /)
@@ -50,12 +53,12 @@ function clean() {
 
 # check file size
 function fs() {
-    du -sh ${1} | awk '{print $1}'
+    du -sh "${1}" | awk '{print $1}'
 }
 
 # check processes using a port
 function port() {
-    lsof -iTCP:$1 -sTCP:LISTEN
+    lsof -iTCP:"$1" -sTCP:LISTEN
 }
 
 # credit: http://nparikh.org/notes/zshrc.txt
@@ -63,25 +66,25 @@ function port() {
 # Description: extracts archived files / mounts disk images
 # Note: .dmg/hdiutil is Mac OS X-specific.
 extract () {
-    if [ -f $1 ]; then
-        case $1 in
-            *.tar.bz2)  tar -jxvf $1                        ;;
-            *.tar.gz)   tar -zxvf $1                        ;;
-            *.bz2)      bunzip2 $1                          ;;
-            *.dmg)      hdiutil mount $1                    ;;
-            *.gz)       gunzip $1                           ;;
-            *.tar)      tar -xvf $1                         ;;
-            *.tbz2)     tar -jxvf $1                        ;;
-            *.tgz)      tar -zxvf $1                        ;;
-            *.zip)      unzip $1                            ;;
-            *.ZIP)      unzip $1                            ;;
-            *.pax)      cat $1 | pax -r                     ;;
-            *.pax.Z)    uncompress $1 --stdout | pax -r     ;;
-            *.Z)        uncompress $1                       ;;
-            *)          echo "'$1' cannot be extracted/mounted via extract()" ;;
+    if [ -f "$1" ]; then
+        case "$1" in
+            *.tar.bz2)  tar -jxvf "$1"                        ;;
+            *.tar.gz)   tar -zxvf "$1"                        ;;
+            *.bz2)      bunzip2 "$1"                          ;;
+            *.dmg)      hdiutil mount "$1"                    ;;
+            *.gz)       gunzip "$1"                           ;;
+            *.tar)      tar -xvf "$1"                         ;;
+            *.tbz2)     tar -jxvf "$1"                        ;;
+            *.tgz)      tar -zxvf "$1"                        ;;
+            *.zip)      unzip "$1"                            ;;
+            *.ZIP)      unzip "$1"                            ;;
+            *.pax)      pax -r < "$1"                     ;;
+            *.pax.Z)    uncompress "$1" --stdout | pax -r     ;;
+            *.Z)        uncompress "$1"                       ;;
+            *)          echo "$1 cannot be extracted/mounted via extract()" ;;
         esac
     else
-        echo "'$1' is not a valid file"
+        echo "$1 is not a valid file"
     fi
 }
 

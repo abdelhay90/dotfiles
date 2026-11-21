@@ -6,10 +6,10 @@ elif [[ $TERM = xterm ]] && infocmp xterm-256color >/dev/null 2>&1; then
     export TERM=xterm-256color
 fi
 
-LIGHTRED=$(tput setaf 9)
-ORANGE=$(tput setaf 172)
-PURPLE=$(tput setaf 141)
-RESET=$(tput sgr0)
+LIGHTRED=$(tput setaf 9 2>/dev/null)
+ORANGE=$(tput setaf 172 2>/dev/null)
+PURPLE=$(tput setaf 141 2>/dev/null)
+RESET=$(tput sgr0 2>/dev/null)
 
 function git_info() {
     # not in a git repo -> nothing

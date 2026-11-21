@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Configs for Linux machines
+[[ $- == *i* ]] && echo 'Linux profile loaded.'
+
+# enable ls colors
+alias ls="ls --color=auto"

@@ -16,14 +16,20 @@ BASH_SRC_PATH="$DOTFILES_PATH/bash"
 [[ $- == *i* ]] && . "$BASH_SRC_PATH/.prompt"
 
 # Homebrew first so later path_add entries sit in front of system paths
-[ -x /opt/homebrew/bin/brew ] && eval "$(/opt/homebrew/bin/brew shellenv)"
+for _brew in /opt/homebrew/bin/brew /home/linuxbrew/.linuxbrew/bin/brew "$HOME/.linuxbrew/bin/brew"; do
+    [ -x "$_brew" ] && eval "$("$_brew" shellenv)" && break
+done
+unset _brew
 
 # System specific
-[[ $OSTYPE == darwin* ]] && . "$BASH_SRC_PATH/.osx"
+case $OSTYPE in
+    darwin*) . "$BASH_SRC_PATH/.osx" ;;
+    linux*)  . "$BASH_SRC_PATH/.linux" ;;
+esac
 
 # bash-only: completion (zsh has its own)
 if [ -n "$BASH_VERSION" ]; then
-    for f in /opt/homebrew/etc/profile.d/bash_completion.sh /usr/local/etc/profile.d/bash_completion.sh; do
+    for f in /opt/homebrew/etc/profile.d/bash_completion.sh /usr/local/etc/profile.d/bash_completion.sh /usr/share/bash-completion/bash_completion; do
         # shellcheck source=/dev/null
         [ -r "$f" ] && . "$f" && break
     done

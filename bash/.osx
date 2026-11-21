@@ -27,3 +27,8 @@ alias nodemodules="find . -name node_modules -type d -prune -exec rm -rf '{}' +"
 # hint for these shortcuts
 # shellcheck disable=SC2139  # expand path at definition time on purpose
 alias hint="echo; cat $BASH_SRC_PATH/.hints; echo; echo"
+
+# copy stdin to clipboard without the trailing newline (mimics linux xclip)
+function xclip() {
+  printf %s "$(cat)" | pbcopy
+}

@@ -128,29 +128,3 @@ function rename_git_branch() {
     echo "Done!"
 }
 
-function update_bff_api() {
-    local sep="-------------------------------------------------------------"
-    echo "pnpm generate:clean"; pnpm generate:clean || return; sleep 4
-    echo "$sep"
-    echo "pnpm generate:auth"; pnpm generate:auth || return; sleep 4
-    echo "$sep"
-    echo 'update swagger.json file and remove "<>",'
-    sed -i '' 's/"<>",//g' ./swagger.json || return; sleep 4
-    echo "$sep"
-    echo "pnpm generate:bff"; pnpm generate:bff || return; sleep 4
-    echo "$sep"
-    echo "Happy hacking!"
-}
-
-# function run_kamel($args){
-#     set -e
-#     cd /Users/ahmed_abdulhay/Work/incorta/kamel
-#     ./kamel.sh $args
-#     # cd -
-#     # pwd
-# }
-
-# copy stdin to clipboard without the trailing newline
-function xclip() {
-  printf %s "$(cat)" | pbcopy
-}
